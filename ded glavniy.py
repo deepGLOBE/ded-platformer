@@ -18,7 +18,7 @@ clock = pygame.time.Clock()
 from load import*
 
 def restart():
-    global players_group, earth_group,box_group,center_group,water_group,camera_group
+    global players_group, earth_group,box_group,center_group,water_group,camera_group,player
     players_group = pygame.sprite.Group()
     earth_group = pygame.sprite.Group()
     box_group = pygame.sprite.Group()
@@ -133,9 +133,25 @@ class Earth(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+
     def update(self,step):
         self.rect.x += step
+        if pygame.sprite.spritecollide(self, players_group , False):
+            if abs(self.rect.top - player.rect.bottom) < 15:
+                player.rect.bottom = self.rect.top - 5
+                player.on_ground = True
 
+            if abs(self.rect.bottom - player.rect.top) <15:
+                player.rect.top = self.rect.bottom + 5
+                player.velocity = 0
+
+            if (abs(self.rect.left - player.rect.right) <15
+                     and abs(self.rect.centery - player.rect.centery) <50):
+                player.rect.right = self.rect.left
+
+            if (abs(self.rect.right - player.rect.left) <15
+                     and abs(self.rect.centery - player.rect.centery) <50):
+                player.rect.left = self.rect.right
 
 
 class Water(pygame.sprite.Sprite):
@@ -145,8 +161,26 @@ class Water(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+
     def update(self,step):
         self.rect.x += step
+        if pygame.sprite.spritecollide(self, players_group, False):
+            if abs(self.rect.top - player.rect.bottom) < 15:
+                player.rect.bottom = self.rect.top - 5
+                player.on_ground = True
+
+            if abs(self.rect.bottom - player.rect.top) < 15:
+                player.rect.top = self.rect.bottom + 5
+                player.velocity = 0
+
+            if (abs(self.rect.left - player.rect.right) < 15
+                    and abs(self.rect.centery - player.rect.centery) < 50):
+                player.rect.right = self.rect.left
+
+            if (abs(self.rect.right - player.rect.left) < 15
+                    and abs(self.rect.centery - player.rect.centery) < 50):
+                player.rect.left = self.rect.right
+
 
 class Box(pygame.sprite.Sprite):
     def __init__(self, image, pos):
@@ -155,9 +189,25 @@ class Box(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+
     def update(self,step):
         self.rect.x += step
+        if pygame.sprite.spritecollide(self, players_group, False):
+            if abs(self.rect.top - player.rect.bottom) < 15:
+                player.rect.bottom = self.rect.top - 5
+                player.on_ground = True
 
+            if abs(self.rect.bottom - player.rect.top) < 15:
+                player.rect.top = self.rect.bottom + 5
+                player.velocity = 0
+
+            if (abs(self.rect.left - player.rect.right) < 15
+                    and abs(self.rect.centery - player.rect.centery) < 50):
+                player.rect.right = self.rect.left
+
+            if (abs(self.rect.right - player.rect.left) < 15
+                    and abs(self.rect.centery - player.rect.centery) < 50):
+                player.rect.left = self.rect.right
 
 class Center(pygame.sprite.Sprite):
     def __init__(self, image, pos):
@@ -166,8 +216,25 @@ class Center(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+
     def update(self,step):
         self.rect.x += step
+        if pygame.sprite.spritecollide(self, players_group, False):
+            if abs(self.rect.top - player.rect.bottom) < 15:
+                player.rect.bottom = self.rect.top - 5
+                player.on_ground = True
+
+            if abs(self.rect.bottom - player.rect.top) < 15:
+                player.rect.top = self.rect.bottom + 5
+                player.velocity = 0
+
+            if (abs(self.rect.left - player.rect.right) < 15
+                    and abs(self.rect.centery - player.rect.centery) < 50):
+                player.rect.right = self.rect.left
+
+            if (abs(self.rect.right - player.rect.left) < 15
+                    and abs(self.rect.centery - player.rect.centery) < 50):
+                player.rect.left = self.rect.right
 
 
 class Player(pygame.sprite.Sprite):
@@ -178,19 +245,28 @@ class Player(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
         self.speed = 5
+        self.velocity_y = 0
+        self.on_ground = True
 
     def update(self, *args, **kwargs):
         key = pygame.key.get_pressed()
         if key[pygame.K_d]:
             self.rect.x += self.speed
-            if self.rect.right > 1000:
-                self.right = 1000
+            if self.rect.right > WIDTH/2 + 500:
+                self.rect.right = WIDTH/2 + 500
                 camera_group.update(-self.speed)
         elif key[pygame.K_a]:
             self.rect.x -= self.speed
-            if self.rect.left > 1000:
-                self.left = 1000
+            if self.rect.left < WIDTH/2 - 500:
+                self.rect.left = WIDTH/2 - 500
                 camera_group.update(self.speed)
+        if key[pygame.K_SPACE] and self.on_ground:
+            self.velocity_y = -17
+            self.on_ground = False
+        self.rect.y += self.velocity_y
+        self.velocity_y += 1
+        if self.velocity_y > 10:
+            self.velocity_y = 10
 
 
 
