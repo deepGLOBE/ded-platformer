@@ -32,7 +32,8 @@ def restart():
 
 
 def gamelvl():
-    sc.fill('black')
+    sc.blit(skala_image,(0,0))
+
     players_group.update()
     players_group.draw(sc)
     earth_group.update(0)
@@ -267,11 +268,15 @@ class Player(pygame.sprite.Sprite):
         self.velocity_y += 1
         if self.velocity_y > 10:
             self.velocity_y = 10
-
-
-
-
-
+        if key[pygame.K_w]:
+            self.rect.y += self.speed
+            if self.rect.top < WIDTH/2 + 500:
+                self.rect.top = WIDTH/2 + 500
+        if key[pygame.K_r]:
+            restart()
+            drawMaps('1.txt')
+        if key[pygame.K_q]:
+            self.velocity_y = 15
 
 
 

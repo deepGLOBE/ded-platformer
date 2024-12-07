@@ -14,7 +14,7 @@ enemy_3_image = pygame.image.load('image/enemy/3/1.png').convert_alpha()
 enemy_4_image = pygame.image.load('image/enemy/4/1.png').convert_alpha()
 portal_image = pygame.image.load('image/portal/Portal_100x100px1.png')
 monetka_image =pygame.image.load('image/item/monetka.png').convert_alpha()
-
+skala_image = pygame.transform.scale(pygame.image.load('image/backgrund/2.jpg').convert_alpha(), (1200,800))
 
 
 
