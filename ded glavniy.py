@@ -1,11 +1,11 @@
-from email.header import Header
+from tokenize import group
 
 import pygame
 import  os
 import sys
 import random
 
-from pygame.examples.moveit import WIDTH, HEIGHT
+
 
 pygame.init()
 current_path = os.path.dirname(__file__)
@@ -18,7 +18,7 @@ clock = pygame.time.Clock()
 from load import*
 
 def restart():
-    global players_group, earth_group,box_group,center_group,water_group,camera_group,player
+    global players_group, earth_group,box_group,center_group,water_group,camera_group,player,monetka_group
     players_group = pygame.sprite.Group()
     earth_group = pygame.sprite.Group()
     box_group = pygame.sprite.Group()
@@ -27,7 +27,7 @@ def restart():
     camera_group = pygame.sprite.Group()
     player = Player(players_image, (300,300))
     players_group.add(player)
-
+    monetka_group = pygame.sprite.Group()
 
 
 
@@ -44,8 +44,9 @@ def gamelvl():
     water_group.draw(sc)
     center_group.update(0)
     center_group.draw(sc)
+    monetka_group.update(0)
+    monetka_group.draw(sc)
     pygame.display.update()
-
 
 
 
@@ -81,6 +82,10 @@ def drawMaps(nameFile,):
                 center = Center(center_image,pos)
                 center_group.add(center)
                 camera_group.add(center)
+            elif maps[i][j] == "6":
+                monetka = Monetka(monetka_image,pos)
+                monetka_group.add(monetka)
+                camera_group.add(monetka)
 
 
 
@@ -122,8 +127,18 @@ def drawMaps(nameFile,):
 
 
 
+class Monetka(pygame.sprite.Sprite):
+    def __init__(self, image, pos):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
 
 
+    def update(self, step):
+        print(step)
+        self.rect.x += step
 
 
 
@@ -248,19 +263,45 @@ class Player(pygame.sprite.Sprite):
         self.speed = 5
         self.velocity_y = 0
         self.on_ground = True
+        self.frame = 0
+        self.timer_anime = 0
+        self.anime = False
+
+    def animation(self):
+        if self.anime:
+            self.timer_anime += 1
+            if self.timer_anime / FPS > 0.2:
+                if self.frame == len(player_image) - 1:
+                    self.frame = 0
+                else:
+                    self.frame +=1
+                    self.timer_anime = 0
+
+
+
+
 
     def update(self, *args, **kwargs):
         key = pygame.key.get_pressed()
         if key[pygame.K_d]:
             self.rect.x += self.speed
+            self.image = player_image[self.frame]
             if self.rect.right > WIDTH/2 + 500:
                 self.rect.right = WIDTH/2 + 500
+
                 camera_group.update(-self.speed)
+
         elif key[pygame.K_a]:
             self.rect.x -= self.speed
+            self.image = pygame.transform.flip(player_image[self.frame], True, False)
             if self.rect.left < WIDTH/2 - 500:
                 self.rect.left = WIDTH/2 - 500
+
                 camera_group.update(self.speed)
+
+
+
+
         if key[pygame.K_SPACE] and self.on_ground:
             self.velocity_y = -17
             self.on_ground = False
@@ -277,6 +318,14 @@ class Player(pygame.sprite.Sprite):
             drawMaps('1.txt')
         if key[pygame.K_q]:
             self.velocity_y = 15
+        self.animation()
+        if self.speed > 0:
+            self.anime = True
+        if self.speed < 0:
+            self.anime = True
+        if self.speed == 0:
+            self.anime = False
+
 
 
 

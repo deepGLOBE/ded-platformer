@@ -1,4 +1,6 @@
 import pygame
+from script import  load_image
+player_image = load_image('image/players')
 earth_image  = pygame.image.load('image/blocks/earth.png').convert_alpha()
 center_image = pygame.image.load('image/blocks/center.png').convert_alpha()
 box_image = pygame.image.load('image/blocks/box.png').convert_alpha()
