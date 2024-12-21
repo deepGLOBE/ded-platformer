@@ -1,5 +1,3 @@
-from tokenize import group
-
 import pygame
 import  os
 import sys
@@ -18,7 +16,7 @@ clock = pygame.time.Clock()
 from load import*
 
 def restart():
-    global players_group, earth_group,box_group,center_group,water_group,camera_group,player,monetka_group
+    global players_group, earth_group,box_group,center_group,water_group,camera_group,player,monetka_group,fireball_group
     players_group = pygame.sprite.Group()
     earth_group = pygame.sprite.Group()
     box_group = pygame.sprite.Group()
@@ -28,6 +26,7 @@ def restart():
     player = Player(players_image, (300,300))
     players_group.add(player)
     monetka_group = pygame.sprite.Group()
+    fireball_group = pygame.sprite.Group()
 
 
 
@@ -46,6 +45,8 @@ def gamelvl():
     center_group.draw(sc)
     monetka_group.update(0)
     monetka_group.draw(sc)
+    fireball_group.update(0)
+    fireball_group.draw(sc)
     pygame.display.update()
 
 
@@ -115,7 +116,41 @@ def drawMaps(nameFile,):
 
 
 
+class Fireball(pygame.sprite.Sprite):
+    def __init__(self, pos, dir):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = fireball_image[0]
+        self.rect = self.image.get_rect()
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]-20
+        self.frame = 0
+        self.anime = True
+        self.timer_anime = 0
+        if dir == 'left':
+            self.speed = -5
+        else:
+            self.speed = 5
+        print(567567576)
 
+    def update(self,step):
+        self.animation()
+        self.rect.x += step + self.speed
+        if self.speed > 0:
+            self.image = fireball_image[self.frame]
+        else:
+            self.image = pygame.transform.flip(fireball_image[self.frame],True,False)
+
+
+
+    def animation(self):
+        if self.anime:
+            self.timer_anime += 1
+            if self.timer_anime / FPS > 0.1:
+                if self.frame == len(fireball_image) - 1:
+                    self.kill()
+                else:
+                    self.frame += 1
+                self.timer_anime = 0
 
 
 
@@ -137,7 +172,6 @@ class Monetka(pygame.sprite.Sprite):
 
 
     def update(self, step):
-        print(step)
         self.rect.x += step
 
 
@@ -233,6 +267,7 @@ class Center(pygame.sprite.Sprite):
         self.rect.x = pos[0]
         self.rect.y = pos[1]
 
+
     def update(self,step):
         self.rect.x += step
         if pygame.sprite.spritecollide(self, players_group, False):
@@ -266,6 +301,8 @@ class Player(pygame.sprite.Sprite):
         self.frame = 0
         self.timer_anime = 0
         self.anime = False
+        self.timer_attack = 0
+        self.dir = 'right'
 
     def animation(self):
         if self.anime:
@@ -277,13 +314,19 @@ class Player(pygame.sprite.Sprite):
                     self.frame +=1
                     self.timer_anime = 0
 
+    def attack(self):
+        self.timer_attack += 1
+        if self.key[pygame.K_RETURN] and self.timer_attack / FPS > 1:
 
-
+            fireball = Fireball(self.rect.center, self.dir)
+            fireball_group.add(fireball)
+            camera_group.add(fireball)
+            self.timer_attack = 0
 
 
     def update(self, *args, **kwargs):
-        key = pygame.key.get_pressed()
-        if key[pygame.K_d]:
+        self.key = pygame.key.get_pressed()
+        if  self.key[pygame.K_d]:
             self.rect.x += self.speed
             self.image = player_image[self.frame]
             if self.rect.right > WIDTH/2 + 500:
@@ -291,7 +334,7 @@ class Player(pygame.sprite.Sprite):
 
                 camera_group.update(-self.speed)
 
-        elif key[pygame.K_a]:
+        elif  self.key[pygame.K_a]:
             self.rect.x -= self.speed
             self.image = pygame.transform.flip(player_image[self.frame], True, False)
             if self.rect.left < WIDTH/2 - 500:
@@ -302,23 +345,24 @@ class Player(pygame.sprite.Sprite):
 
 
 
-        if key[pygame.K_SPACE] and self.on_ground:
+        if  self.key[pygame.K_SPACE] and self.on_ground:
             self.velocity_y = -17
             self.on_ground = False
         self.rect.y += self.velocity_y
         self.velocity_y += 1
         if self.velocity_y > 10:
             self.velocity_y = 10
-        if key[pygame.K_w]:
+        if  self.key[pygame.K_w]:
             self.rect.y += self.speed
             if self.rect.top < WIDTH/2 + 500:
                 self.rect.top = WIDTH/2 + 500
-        if key[pygame.K_r]:
+        if  self.key[pygame.K_r]:
             restart()
             drawMaps('1.txt')
-        if key[pygame.K_q]:
+        if  self.key[pygame.K_q]:
             self.velocity_y = 15
         self.animation()
+        self.attack()
         if self.speed > 0:
             self.anime = True
         if self.speed < 0:
